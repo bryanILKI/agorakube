@@ -35,8 +35,10 @@ agorakube_base_components:
           nodename: "master1"
           path: /var/etcd-backup
   kubernetes:
-    release: v1.21.5
-    upgrade: false
+    release: v1.23.0
+    upgrade: False
+  cloud_controller_manager:
+    enabled: False
   container:
     engine: containerd
 # release : Only Supported if container engine is set to docker
@@ -45,6 +47,7 @@ agorakube_base_components:
 
 agorakube_network:
   cni_plugin: calico
+  calico_autodetection_method: "first-found"
   mtu: 0
   cidr:
     pod: 10.33.0.0/16
@@ -52,6 +55,9 @@ agorakube_network:
   service_ip:
     kubernetes: 10.32.0.1 
     coredns: 10.32.0.10
+  dns:
+    primary_forwarder: 8.8.8.8
+    secondary_forwarder: 8.8.4.4
   nodeport:
     range: 30000-32000
   external_loadbalancing:
@@ -67,10 +73,10 @@ agorakube_features:
     release: "1.8.3"
     replicas: 2
   reloader:
-    enabled: false
+    enabled: False
     release: "0.0.89"
   storage:
-    enabled: false
+    enabled: False
     release: "2.9.0"
     jiva:
       data_path: /var/openebs
@@ -78,69 +84,102 @@ agorakube_features:
     hostpath:
       data_path: /var/local-hostpath
   dashboard:
-    enabled: false
-    generate_admin_token: false
+    enabled: False
+    generate_admin_token: False
     release: v2.2.0
   metrics_server:
-    enabled: true
+    enabled: True
   ingress:
     controller: nginx
-    release: v0.46.0
-  monitoring:
-    enabled: false
-    persistent:
-      enable: false
-      storage:
-        capacity: 4Gi
-        type: "storageclass"
-        storageclass:
-          name: "default-jiva"
-        persistentvolume:
-          name: "my-pv-monitoring"
-          storageclass: "my-storageclass-name"
-        hostpath:
-          nodename: "master1"
-          path: /var/monitoring-persistent
-    admin:
-      user: administrator
-      password: P@ssw0rd
+    release: v1.1.0
+
+  supervision:
+    monitoring:
+      enabled: False
+      dashboard: True
+      persistent:
+        enabled: False
+        storage:
+          capacity: 4Gi
+          type: "storageclass"
+          storageclass:
+            name: "default-jiva"
+          persistentvolume:
+            name: "my-pv-monitoring"
+            storageclass: "my-storageclass-name"
+          hostpath:
+            nodename: "worker1"
+            path: /var/monitoring-persistent
+    dashboard:
+      admin:
+        user: administrator
+        password: P@ssw0rd
+      persistent:
+        enabled: False
+        storage:
+          capacity: 4Gi
+          type: "storageclass"
+          storageclass: 
+            name: "default-jiva"
+          persistentvolume:
+            name: "my-pv-monitoring"
+            storageclass: "my-storageclass-name"
+          hostpath: 
+            nodename: "worker1"
+            path: /var/grafana-persistent
+    logging:
+      enabled: False
+      dashboard: True
+      persistent:
+        enabled: False
+        storage:
+          capacity: 4Gi
+          type: "storageclass"
+          storageclass:
+            name: "default-jiva"
+          persistentvolume:
+            name: "my-pv-monitoring"
+            storageclass: "my-storageclass-name"
+          hostpath:
+            nodename: "worker1"
+            path: /var/logging-persistent
   logrotate:
-    enabled: false
+    enabled: False
     crontab: "* 2 * * *"
     day_retention: 14
   gatekeeper:
-    enabled: false
+    enabled: False
     release: v3.4.0
     replicas:
       #audit: 1
       controller_manager: 3
 #argocd is an Alpha feature and do not support persistence wet. Use it only for test purpose.
   argocd:
-    enabled: false
+    enabled: False
    
-# keycloak_oidc is an Alpha feature and do not support persistence wet. Use it only for test purpose.
+# keycloak_oidc is an Alpha feature.
   keycloak_oidc:
-    enabled: false
+    enabled: False
     admin:
       user: administrator
       password: P@ssw0rd
     auto_bootstrap:
         bootstrap_keycloak: true
-        bootstrap_kube_apiserver: false
+        bootstrap_kube_apiserver: true
         populate_etc_hosts: true
         host: oidc.local.lan
-#    storage:
-#        enabled: False
-#        capacity: 10Gi
-#        type: "storageclass"
-#        storageclass:
-#          name: "default-jiva"
-#        persistentvolume:
-#          name: "my-pv-backup-etcd"
-#          storageclass: "my-storageclass-name"
-#        hostpath:
-#          nodename: "master1"
-#          path: /var/keycloak
+    storage:
+        enabled: False
+        capacity: 10Gi
+        type: "storageclass"
+        storageclass:
+          name: "default-jiva"
+        persistentvolume:
+          name: "my-pv-backup-etcd"
+          storageclass: "my-storageclass-name"
+        hostpath:
+          nodename: "master1"
+          path: /var/keycloak
 
 agorakube_populate_etc_hosts: True
 
